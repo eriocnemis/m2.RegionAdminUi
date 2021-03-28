@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Eriocnemis, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Eriocnemis_Region::geography"
+             title="Geography"
+             translate="title"
+             module="Eriocnemis_RegionAdminUi"
+             sortOrder="56"
+             parent="Magento_Backend::stores"
+             resource="Eriocnemis_Region::geography"/>
+        <add id="Eriocnemis_Region::region"
+             title="Regions"
+             translate="title"
+             module="Eriocnemis_RegionAdminUi"
+             sortOrder="10"
+             parent="Eriocnemis_Region::geography"
+             action="eriocnemis_region"
+             resource="Eriocnemis_Region::region"/>
+    </menu>
+</config>

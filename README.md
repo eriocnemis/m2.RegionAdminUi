@@ -1,4 +1,4 @@
-# Magento2 Region Api
+# Magento2 Region Admin Ui
 
 The module provides UI for Admin Panel of regions manage as well as bulk operations. This module is installed as part of [Eriocnemis Region Kit](https://github.com/eriocnemis/m2.RegionKit). It cannot be deleted or disabled.
 

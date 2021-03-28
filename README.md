@@ -2,6 +2,24 @@
 
 The module provides UI for Admin Panel of regions manage as well as bulk operations. This module is installed as part of [Eriocnemis Region Kit](https://github.com/eriocnemis/m2.RegionKit). It cannot be deleted or disabled.
 
+## Usage
+
+### Menu
+
+*Stores > Geography > Regions*.
+
+### Region Edit Page: general tab
+
+<img alt="Magento2 Directory" src="http://eriocnemis.com/image/m2/directory/region.general.png" style="width:100%"/>
+
+### Region Edit Page: labels tab
+
+<img alt="Magento2 Directory" src="http://eriocnemis.com/image/m2/directory/region.label.png" style="width:100%"/>
+
+### Region Grid Page
+
+<img alt="Magento2 Directory" src="http://eriocnemis.com/image/m2/directory/regions.png" style="width:100%"/>
+
 ## Extensibility
 
 Extension developers can interact with the this module. For more information about the Magento extension mechanism, see [Magento plug-ins](https://devdocs.magento.com/guides/v2.4/extension-dev-guide/plugins.html).

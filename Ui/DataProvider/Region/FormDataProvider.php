@@ -146,26 +146,11 @@ class FormDataProvider extends DataProvider
         $data = $this->dataPersistor->get('eriocnemis_region') ?: [];
         if (null !== $regionId) {
             $region = $this->getRegionById->execute($regionId);
-            $data = array_map([$this, 'updateValue'], $this->hydrator->extract($region));
+            $data = $this->hydrator->extract($region);
         }
         $this->dataPersistor->clear('eriocnemis_region');
 
         return $data;
-    }
-
-    /**
-     * Modify data value
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    public function updateValue($value)
-    {
-        if (is_numeric($value)) {
-            // for proper work of form and grid (for example for Yes/No properties)
-            $value = (string)$value;
-        }
-        return $value;
     }
 
     /**

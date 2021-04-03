@@ -68,4 +68,11 @@
             </argument>
         </arguments>
     </virtualType>
+    <type name="Magento\Framework\Reflection\DataObjectProcessor">
+        <arguments>
+            <argument name="processors" xsi:type="array">
+                <item name="Eriocnemis\RegionApi\Api\Data\RegionInterface" xsi:type="object">Eriocnemis\RegionAdminUi\Model\Region\OutputProcessor</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -65,7 +65,7 @@ class MassDelete extends Action implements HttpPostActionInterface
     }
 
     /**
-     * Delete specified export jobs
+     * Delete specified regions
      *
      * @return ResultInterface
      */

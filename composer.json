@@ -2,7 +2,7 @@
     "name": "eriocnemis/module-region-admin-ui",
     "description": "The module provides UI for Admin Panel of regions manage as well as bulk operations.",
     "type": "magento2-module",
-    "version": "2.3.1",
+    "version": "2.4.1",
     "authors": [{
         "name": "Eriocnemis Team",
         "email": "dev.eriocnemis@gmail.com"

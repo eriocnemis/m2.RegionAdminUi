@@ -1,0 +1,10 @@
+parameters:
+    checkExplicitMixedMissingReturn: true
+    checkPhpDocMissingReturn: true
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#\$callback of method Magento\\Framework\\Data\\Collection::walk\(\) expects callable\(\)#'
+        - '#Call to an undefined method Magento\\Framework\\App\\RequestInterface::isPost\(\).#'
+        - '#Call to an undefined method Magento\\Framework\\App\\RequestInterface::getPost\(\).#'
+        - '#Call to an undefined method Magento\\Framework\\App\\RequestInterface::setPath\(\).#'
+        - '#Call to an undefined method Magento\\Framework\\Controller\\ResultInterface::setPath\(\).#'

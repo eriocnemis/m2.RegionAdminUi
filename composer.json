@@ -3,10 +3,12 @@
     "description": "The module provides UI for Admin Panel of regions manage as well as bulk operations.",
     "type": "magento2-module",
     "version": "2.4.1",
-    "authors": [{
-        "name": "Eriocnemis Team",
-        "email": "dev.eriocnemis@gmail.com"
-    }],
+    "authors": [
+        {
+            "name": "Eriocnemis Team",
+            "email": "dev.eriocnemis@gmail.com"
+        }
+    ],
     "license": [
         "OSL-3.0"
     ],
@@ -20,10 +22,10 @@
     },
     "autoload": {
         "files": [
-            "registration.php"
+            "src/registration.php"
         ],
         "psr-4": {
-            "Eriocnemis\\RegionAdminUi\\": ""
+            "Eriocnemis\\RegionAdminUi\\": "src"
         }
     }
 }

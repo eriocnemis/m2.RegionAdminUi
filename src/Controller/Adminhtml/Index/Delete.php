@@ -7,12 +7,11 @@ declare(strict_types=1);
 
 namespace Eriocnemis\RegionAdminUi\Controller\Adminhtml\Index;
 
-use Psr\Log\LoggerInterface;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Eriocnemis\Core\Exception\ResolveExceptionInterface;
 use Eriocnemis\RegionApi\Api\Data\RegionInterface;
 use Eriocnemis\RegionApi\Api\DeleteRegionByIdInterface;
 
@@ -27,29 +26,34 @@ class Delete extends Action implements HttpPostActionInterface
     const ADMIN_RESOURCE = 'Eriocnemis_Region::region_delete';
 
     /**
+     * Action name constant
+     */
+    const ACTION_NAME = 'delete';
+
+    /**
      * @var DeleteRegionByIdInterface
      */
     private $deleteRegionById;
 
     /**
-     * @var LoggerInterface
+     * @var ResolveExceptionInterface
      */
-    private $logger;
+    private $resolveException;
 
     /**
      * Initialize controller
      *
      * @param Context $context
      * @param DeleteRegionByIdInterface $deleteRegionById
-     * @param LoggerInterface $logger
+     * @param ResolveExceptionInterface $resolveException
      */
     public function __construct(
         Context $context,
         DeleteRegionByIdInterface $deleteRegionById,
-        LoggerInterface $logger
+        ResolveExceptionInterface $resolveException
     ) {
         $this->deleteRegionById = $deleteRegionById;
-        $this->logger = $logger;
+        $this->resolveException = $resolveException;
 
         parent::__construct(
             $context
@@ -63,41 +67,36 @@ class Delete extends Action implements HttpPostActionInterface
      */
     public function execute(): ResultInterface
     {
+        $regionId = (int)$this->getRequest()->getPost(RegionInterface::REGION_ID);
         /** @var \Magento\Framework\Controller\Result\Redirect $result */
         $result = $this->resultRedirectFactory->create();
 
-        $regionId = (int)$this->getRequest()->getPost(RegionInterface::REGION_ID);
-        if (!$regionId) {
-            $this->messageManager->addErrorMessage(
-                (string)__('Wrong request.')
-            );
-            return $result->setPath('*/*');
+        if ($regionId) {
+            try {
+                $this->deleteRegionById->execute($regionId);
+                $this->messageManager->addSuccessMessage(
+                    (string)__('The Region has been deleted.')
+                );
+                return $result->setPath('*/*/index');
+            } catch (\Exception $e) {
+                $this->resolveException->execute($e, self::ACTION_NAME);
+            }
+            return $result->setPath('*/*/edit', $this->getParams($regionId));
         }
+        return $result->setPath('*/*');
+    }
 
-        try {
-            $this->deleteRegionById->execute($regionId);
-            $this->messageManager->addSuccessMessage(
-                (string)__('The Region has been deleted.')
-            );
-            $result->setPath('*/*/index');
-        } catch (LocalizedException $e) {
-            $this->messageManager->addErrorMessage(
-                $e->getMessage()
-            );
-            $result->setPath('*/*/edit', [
-                RegionInterface::REGION_ID => $regionId,
-                '_current' => true,
-            ]);
-        } catch (\Exception $e) {
-            $this->logger->critical($e->getMessage());
-            $this->messageManager->addErrorMessage(
-                (string)__('We can\'t delete the region right now. Please review the log and try again.')
-            );
-            $result->setPath('*/*/edit', [
-                RegionInterface::REGION_ID => $regionId,
-                '_current' => true,
-            ]);
-        }
-        return $result;
+    /**
+     * Retrieve params
+     *
+     * @param int $regionId
+     * @return mixed[]
+     */
+    private function getParams(int $regionId): array
+    {
+        return [
+            RegionInterface::REGION_ID => $regionId,
+            '_current' => true
+        ];
     }
 }

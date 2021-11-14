@@ -7,18 +7,14 @@ declare(strict_types=1);
 
 namespace Eriocnemis\RegionAdminUi\Controller\Adminhtml\Index;
 
-use Psr\Log\LoggerInterface;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
-use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Validation\ValidationException;
-use Magento\Framework\App\Request\DataPersistorInterface;
-use Eriocnemis\RegionAdminUi\Api\ResolveRegionInterface;
-use Eriocnemis\RegionAdminUi\Model\Region\HydratorInterface;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Eriocnemis\Core\Exception\ResolveExceptionInterface;
 use Eriocnemis\RegionApi\Api\Data\RegionInterface;
-use Eriocnemis\RegionApi\Api\SaveRegionInterface;
+use Eriocnemis\RegionAdminUi\Api\SaveRegionDataInterface;
 
 /**
  * Save controller
@@ -31,53 +27,34 @@ class Save extends Action implements HttpPostActionInterface
     const ADMIN_RESOURCE = 'Eriocnemis_Region::region_edit';
 
     /**
-     * @var ResolveRegionInterface
+     * Action name constant
      */
-    private $resolveRegion;
+    const ACTION_NAME = 'save';
 
     /**
-     * @var SaveRegionInterface
+     * @var SaveRegionDataInterface
      */
-    private $saveRegion;
+    private $saveRegionData;
 
     /**
-     * @var HydratorInterface
+     * @var ResolveExceptionInterface
      */
-    private $hydrator;
-
-    /**
-     * @var DataPersistorInterface
-     */
-    private $dataPersistor;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private $resolveException;
 
     /**
      * Initialize controller
      *
      * @param Context $context
-     * @param SaveRegionInterface $saveRegion
-     * @param ResolveRegionInterface $resolveRegion
-     * @param HydratorInterface $hydrator
-     * @param DataPersistorInterface $dataPersistor
-     * @param LoggerInterface $logger
+     * @param SaveRegionDataInterface $saveRegionData
+     * @param ResolveExceptionInterface $resolveException
      */
     public function __construct(
         Context $context,
-        SaveRegionInterface $saveRegion,
-        ResolveRegionInterface $resolveRegion,
-        HydratorInterface $hydrator,
-        DataPersistorInterface $dataPersistor,
-        LoggerInterface $logger
+        SaveRegionDataInterface $saveRegionData,
+        ResolveExceptionInterface $resolveException
     ) {
-        $this->saveRegion = $saveRegion;
-        $this->resolveRegion = $resolveRegion;
-        $this->hydrator = $hydrator;
-        $this->dataPersistor = $dataPersistor;
-        $this->logger = $logger;
+        $this->saveRegionData = $saveRegionData;
+        $this->resolveException = $resolveException;
 
         parent::__construct(
             $context
@@ -91,87 +68,58 @@ class Save extends Action implements HttpPostActionInterface
      */
     public function execute(): ResultInterface
     {
-        $data = $this->getRequest()->getPost('region');
-        $regionId = $data[RegionInterface::REGION_ID] ?? null;
-
-        /** @var ResultInterface $result */
+        $regionId = (int)$this->getRequest()->getPost(RegionInterface::REGION_ID);
+        /** @var Redirect $result */
         $result = $this->resultRedirectFactory->create();
-        if (!$this->getRequest()->isPost() || empty($data)) {
-            $this->messageManager->addErrorMessage(
-                (string)__('Wrong request.')
-            );
-            $this->redirectAfterFailure($result);
-            return $result;
-        }
 
         try {
-            $this->dataPersistor->set('eriocnemis_region', $data);
-            $region = $this->resolveRegion->execute($regionId, $data);
-            $this->hydrator->hydrate($region, $data);
-            $region = $this->saveRegion->execute($region);
-            $this->messageManager->addSuccessMessage(
-                (string)__('The Region has been saved.')
-            );
-            $this->redirectAfterSuccess($result, (int)$region->getId());
-        } catch (ValidationException $e) {
-            foreach ($e->getErrors() as $error) {
-                $this->messageManager->addErrorMessage(
-                    $error->getMessage()
-                );
-            }
-            $this->redirectAfterFailure($result, $regionId);
-        } catch (LocalizedException $e) {
-            $this->messageManager->addErrorMessage(
-                $e->getMessage()
-            );
-            $this->redirectAfterFailure($result, $regionId);
+            $region = $this->saveRegionData->execute($this->getRequest());
+            return $this->resolveResult($result, (int)$region->getId());
         } catch (\Exception $e) {
-            $this->logger->critical($e->getMessage());
-            $this->messageManager->addErrorMessage(
-                (string)__('We can\'t save the region right now. Please review the log and try again.')
-            );
-            $this->redirectAfterFailure($result, $regionId);
+            $this->resolveException->execute($e, self::ACTION_NAME);
         }
-        return $result;
+        return $this->resolveFailureResult($result, $regionId);
     }
 
     /**
-     * Retrieve redirect url after save
+     * Resolve success result
      *
-     * @param ResultInterface $result
+     * @param Redirect $result
      * @param int $regionId
-     * @return void
+     * @return ResultInterface
      */
-    private function redirectAfterSuccess(ResultInterface $result, $regionId): void
+    private function resolveResult(Redirect $result, int $regionId): ResultInterface
     {
-        $path = '*/*/';
-        $params = [];
-        if ($this->getRequest()->getParam('back')) {
-            $path = '*/*/edit';
-            $params = ['_current' => true, RegionInterface::REGION_ID => $regionId];
-        } elseif ($this->getRequest()->getParam('redirect_to_new')) {
-            $path = '*/*/new';
-            $params = ['_current' => true];
-        }
-        $result->setPath($path, $params);
+        return empty($this->getRequest()->getParam('back'))
+            ? $result->setPath('*/*/index')
+            : $result->setPath('*/*/edit', $this->getParams($regionId));
     }
 
     /**
-     * Retrieve redirect url after unsuccessful save
+     * Resolve failure result
      *
-     * @param ResultInterface $result
+     * @param Redirect $result
      * @param int|null $regionId
-     * @return void
+     * @return ResultInterface
      */
-    private function redirectAfterFailure(ResultInterface $result, $regionId = null): void
+    private function resolveFailureResult(Redirect $result, int $regionId = null): ResultInterface
     {
-        if (null === $regionId) {
-            $result->setPath('*/*/new');
-        } else {
-            $result->setPath(
-                '*/*/edit',
-                [RegionInterface::REGION_ID => $regionId, '_current' => true]
-            );
-        }
+        return empty($regionId)
+            ? $result->setPath('*/*/new')
+            : $result->setPath('*/*/edit', $this->getParams($regionId));
+    }
+
+    /**
+     * Retrieve params
+     *
+     * @param int $regionId
+     * @return mixed[]
+     */
+    private function getParams(int $regionId): array
+    {
+        return [
+            RegionInterface::REGION_ID => $regionId,
+            '_current' => true
+        ];
     }
 }

@@ -9,10 +9,11 @@ namespace Eriocnemis\RegionAdminUi\Model;
 
 use Magento\Framework\Api\DataObjectHelper;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Eriocnemis\RegionAdminUi\Api\ResolveRegionInterface;
 use Eriocnemis\RegionApi\Api\Data\RegionInterfaceFactory;
 use Eriocnemis\RegionApi\Api\Data\RegionInterface;
 use Eriocnemis\RegionApi\Api\GetRegionByIdInterface;
+use Eriocnemis\RegionAdminUi\Api\ResolveRegionInterface;
+use Eriocnemis\RegionAdminUi\Model\Region\HydratorInterface;
 
 /**
  * Resolve region data
@@ -25,6 +26,11 @@ class ResolveRegion implements ResolveRegionInterface
      * @var RegionInterfaceFactory
      */
     private $factory;
+
+    /**
+     * @var HydratorInterface
+     */
+    private $hydrator;
 
     /**
      * @var GetRegionByIdInterface
@@ -40,15 +46,18 @@ class ResolveRegion implements ResolveRegionInterface
      * Initialize provider
      *
      * @param RegionInterfaceFactory $factory
+     * @param HydratorInterface $hydrator
      * @param GetRegionByIdInterface $getRegionById
      * @param DataObjectHelper $dataObjectHelper
      */
     public function __construct(
         RegionInterfaceFactory $factory,
+        HydratorInterface $hydrator,
         GetRegionByIdInterface $getRegionById,
         DataObjectHelper $dataObjectHelper
     ) {
         $this->factory = $factory;
+        $this->hydrator = $hydrator;
         $this->getRegionById = $getRegionById;
         $this->dataObjectHelper = $dataObjectHelper;
     }
@@ -68,6 +77,7 @@ class ResolveRegion implements ResolveRegionInterface
             ? $this->getRegionById->execute((int)$regionId)
             : $this->factory->create();
 
+        $this->hydrator->hydrate($region, $data);
         $this->dataObjectHelper->populateWithArray($region, $data, RegionInterface::class);
 
         return $region;

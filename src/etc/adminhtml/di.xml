@@ -8,8 +8,9 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <!-- preference -->
-    <preference for="Eriocnemis\RegionAdminUi\Model\Region\HydratorInterface" type="Eriocnemis\RegionAdminUi\Model\Region\HydratorPool"/>
     <preference for="Eriocnemis\RegionAdminUi\Api\ResolveRegionInterface" type="Eriocnemis\RegionAdminUi\Model\ResolveRegion"/>
+    <preference for="Eriocnemis\RegionAdminUi\Api\SaveRegionDataInterface" type="Eriocnemis\RegionAdminUi\Model\SaveRegionData"/>
+    <preference for="Eriocnemis\RegionAdminUi\Model\Region\HydratorInterface" type="Eriocnemis\RegionAdminUi\Model\Region\HydratorPool"/>
     <!-- buttons configurations -->
     <virtualType name="EriocnemisRegionSaveButton" type="Eriocnemis\RegionAdminUi\Ui\Component\Control\SaveSplitButton">
         <arguments>

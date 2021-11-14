@@ -112,31 +112,7 @@ class SaveSplitButton implements ButtonProviderInterface
                     ],
                 ],
                 'sort_order' => 10,
-            ],
-            [
-                'label' => __('Save &amp; New'),
-                'data_attribute' => [
-                    'mage-init' => [
-                        'buttonAdapter' => [
-                            'actions' => [
-                                [
-                                    'targetName' => $this->targetName,
-                                    'actionName' => 'save',
-                                    'params' => [
-                                        // first param is redirect flag, second is data that will be added to post
-                                        // request
-                                        true,
-                                        [
-                                            'redirect_to_new' => 1,
-                                        ],
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                'sort_order' => 20,
-            ],
+            ]
         ];
         return $options;
     }
